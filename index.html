@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XJTU智慧校园游 - 试行版2.2</title>
+
+    <!-- 引入高德地图 JS API -->
+    <script src="https://webapi.amap.com/maps?v=2.0&key=c3671efe6405aa35284c356354f6ad81"></script>
+
+    <!-- 引入高德地图UI库 -->
+    <script src="https://webapi.amap.com/ui/1.1/main.js"></script>
+
+    <!-- 引入字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #ffffff, #ffd6e7);
+            color: #333;
+            position: relative;
+            padding-bottom: 150px;
+        }
+
+        /* 导航栏样式 */
+        .flex-container {
+            z-index: 1000;
+            display: flex;
+            width: 100%;
+            height: auto;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            background-color: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+        }
+
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .flex-logo {
+            display: flex;
+            z-index: 1000;
+            position: relative;
+            width: 200px;
+            height: 80px;
+            overflow: hidden;
+        }
+
+        .dropdown {
+            z-index: 1000;
+            position: relative;
+            display: inline-block;
+            color: #555;
+            text-align: center;
+            padding: 12px 16px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown:hover {
+            color: #e74c3c;
+            transform: translateY(-3px);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            z-index: 1;
+            top: 100%;
+            left: 0;
+        }
+
+        .dropdown-content a {
+            color: #555;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: all 0.2s;
+        }
+
+        .dropdown-content a:hover {
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: white;
+            padding-left: 20px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .logo {
+            width: 120px;
+            height: 50px;
+            position: relative;
+            top: -1px;
+            left: -10px;
+            transition: all 0.5s;
+        }
+
+        .logo:hover {
+            transform: scale(1.1);
+        }
+
+        .icon {
+            width: 30px;
+            height: 30px;
+            transition: all 0.3s;
+            color: #555;
+        }
+
+        .icon:hover {
+            transform: scale(1.2);
+            color: #e74c3c;
+        }
+
+        #myBtn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 99;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-size: 20px;
+        }
+
+        .flex {
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            width: auto;
+            align-items: center;
+        }
+
+        .flex-item1 {
+            top: 90px;
+            display: flex;
+            position: relative;
+            width: 100%;
+            height: auto;
+            justify-content: center;
+            margin-top: 90px;
+            flex-wrap: wrap;
+        }
+
+        .flex-item {
+            display: flex;
+            position: relative;
+            width: 300px;
+            height: 500px;
+            overflow: hidden;
+            margin: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .flex-item .runimage {
+            width: 900px;
+            height: 500px;
+            overflow: hidden;
+            position: absolute;
+            display: flex;
+            animation: run 15s ease infinite;
+        }
+
+        .flex-item .runimage img {
+            width: 300px;
+            height: 500px;
+            object-fit: cover;
+        }
+
+        @keyframes run {
+            0%, 25% { transform: translateX(0); }
+            30%, 55% { transform: translateX(-300px); }
+            60%, 85% { transform: translateX(-600px); }
+            100% { transform: translateX(0); }
+        }
+
+        .progress {
+            position: absolute;
+            height: 5px;
+            width: 300px;
+            background-color: #eee;
+            bottom: 0;
+            z-index: 100;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .progress-inner {
+            position: absolute;
+            z-index: 100;
+            height: 5px;
+            width: 300px;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            animation: widen 5s infinite;
+            border-radius: 0 0 15px 15px;
+        }
+
+        @keyframes widen {
+            0% { width: 300px; }
+            100% { width: 0; }
+        }
+
+        .main1 {
+            width: 300px;
+            height: 500px;
+        }
+
+        .flex-box1 {
+            display: flex;
+            position: relative;
+            top: 200px;
+            height: 593px;
+            width: 100%;
+            max-width: 1200px;
+            background: linear-gradient(135deg, #2c3e50, #4a235a);
+            background-size: contain;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 20px;
+            margin: 40px auto;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .biaoyu1 {
+            display: flex;
+            position: relative;
+            align-items: center;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            color: #fff;
+            font-size: 8vw;
+            z-index: 3;
+            animation: bigger 5s ease-in-out;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .biaoyu1::after {
+            display: none;
+        }
+
+        @keyframes bigger {
+            0% { transform: scale(1); }
+            50% { transform: scale(10); z-index: 1; }
+            99% { transform: scale(0); }
+            100% { display: none; }
+        }
+
+        .biaoyu2 {
+            display: flex;
+            position: relative;
+            align-items: center;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            color: #fff;
+            font-size: 8vw;
+            z-index: 3;
+            animation: smaller 5s ease-in-out;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            margin-bottom: 40px;
+        }
+
+        @keyframes smaller {
+            0% { transform: scale(10); }
+            100% { transform: scale(1); z-index: 2; }
+        }
+
+        .flex-box2 {
+            z-index: 2;
+            display: flex;
+            font-size: 17px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            width: 90%;
+            max-width: 600px;
+            height: auto;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .search-container {
+            display: flex;
+            width: 100%;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 25px;
+            font-size: 16px;
+            border: none;
+            background: transparent;
+            color: white;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        form.example input[type=text] {
+  padding: 10px;
+  font-size: 17px;
+  border: none;
+  float: left;
+  width: 80%;
+  background: transparent;
+  z-index: 1;
+}
+
+form.example button{
+  z-index: 2;
+  float: left;
+  width: 20%;
+  padding: 10px;
+  background: transparent;
+  font-size: 17px;
+  border: none;
+  border-radius: 30px;
+  border-left: none;
+  cursor: pointer;
+}
+
+form.example::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+
+        .flex-item3 {
+            display: flex;
+            position: relative;
+            width: auto;
+            height: auto;
+            top: 350px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 40px auto;
+            gap: 25px;
+        }
+
+        .photo {
+            width: 220px;
+            height: 300px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .photo:hover {
+            transform: translateY(-10px) scale(1.05);
+            z-index: 20;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .photo:hover img {
+            transform: scale(1.1);
+        }
+
+        .photo::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 60%, rgba(0, 0, 0, 0.7));
+            z-index: 2;
+        }
+
+        .photo-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            color: white;
+            font-weight: 600;
+            z-index: 3;
+        }
+
+        .photo1 { top: 50px; }
+        .photo2 { top: 100px; }
+        .photo3 { height: 350px; }
+        .photo4 { top: 80px; }
+        .photo5 { top: 130px; }
+
+        /* 地图部分 - 关键修复 */
+        .map-section {
+            position: relative;
+            top: 600px;
+            width: 90%;
+            max-width: 1200px;
+            height: 900px;
+            margin: 80px auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        #container {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            width: 200px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .map-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .map-btn {
+            padding: 12px 15px;
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .map-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .result-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .result-item:hover {
+            background-color: #f9f9f9;
+            padding-left: 15px;
+        }
+
+        .result-item h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .result-item p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .info-title {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .lnglat {
+            color: #e74c3c;
+            font-weight: 500;
+            font-family: monospace;
+        }
+
+        .footer {
+            display: flex;
+            position: relative;
+            top: 800px;
+            height: auto;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.85);
+            width: 100%;
+            padding: 40px 0;
+            margin-top: 200px;
+        }
+
+        .p5 {
+            display: flex;
+            font-size: 18px;
+            color: #ddd;
+            margin: 8px 0;
+        }
+
+        /* 自定义信息窗体样式 */
+        .content-window-card {
+            position: relative;
+            box-shadow: none;
+            bottom: 0;
+            left: 0;
+            width: auto;
+            padding: 0;
+        }
+
+        .content-window-card p {
+            height: 2rem;
+        }
+
+        .custom-info {
+            border: solid 1px silver;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        div.info-top {
+            position: relative;
+            background: none repeat scroll 0 0 #F9F9F9;
+            border-bottom: 1px solid #CCC;
+            border-radius: 5px 5px 0 0;
+            padding: 10px;
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+        }
+
+        div.info-top div {
+            display: inline-block;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 31px;
+            padding: 0 10px;
+        }
+
+        div.info-top img {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            transition-duration: 0.25s;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        div.info-top img:hover {
+            transform: scale(1.1);
+        }
+
+        div.info-middle {
+            font-size: 14px;
+            padding: 15px;
+            line-height: 24px;
+            background: white;
+            color: #333;
+        }
+
+        div.info-bottom {
+            height: 0px;
+            width: 100%;
+            clear: both;
+            text-align: center;
+        }
+
+        div.info-bottom img {
+            position: relative;
+            z-index: 104;
+        }
+
+        .info-middle img {
+            float: left;
+            margin-right: 10px;
+            border-radius: 4px;
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+        }
+
+        .info-feature {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .feature-tag {
+            background: #f1f1f1;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #555;
+        }
+
+        .info-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 12px;
+            background: #3498db;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .info-link:hover {
+            background: #2980b9;
+        }
+
+        /* Coze智能体样式 */
+        #coze-assistant-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        #coze-assistant-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        #coze-assistant-btn.coze-active {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+        }
+
+        .coze-assistant-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        #coze-assistant-btn:hover .coze-assistant-label {
+            opacity: 1;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .flex-container {
+                flex-direction: column;
+                padding: 15px 0;
+            }
+
+            ul {
+                margin-top: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .flex-item {
+                margin: 15px;
+                width: 280px;
+                height: 450px;
+            }
+
+            .flex-item .runimage {
+                height: 450px;
+                width: 840px;
+            }
+
+            .flex-item .runimage img {
+                height: 450px;
+                width: 280px;
+            }
+
+            .progress, .progress-inner {
+                width: 280px;
+            }
+
+            .biaoyu1, .biaoyu2 {
+                font-size: 12vw;
+            }
+
+            .photo {
+                width: 280px;
+                height: 350px;
+            }
+
+            .photo1, .photo2, .photo3, .photo4, .photo5 {
+                top: 0;
+            }
+
+            .map-section {
+                top: 600px;
+                height: 500px;
+            }
+
+            .map-overlay {
+                width: 90%;
+                left: 5%;
+                top: 10px;
+            }
+
+            .content-window-card {
+                max-width: 300px;
+            }
+
+            #coze-assistant-btn {
+                bottom: 90px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="myBtn" title="返回顶部"><i class="fas fa-arrow-up"></i></button>
+
+
+
+    <div class="flex">
+        <div class="flex-container">
+            <div class="logo">
+                <a href="https://www.xjtu.edu.cn/"><img src="images/logo.png" class="logo"></a>
+            </div>
+            <ul>
+                <div class="dropdown">
+                    <a href="#" class="dropdown">首页</a>
+                </div>
+                <div class="dropdown">
+                    <a href="#" class="dropdown">景点介绍</a>
+                </div>
+                <div class="dropdown">
+                    <a href="#" class="dropdown">全部活动</a>
+                    <div class="dropdown-content">
+                        <a href="#">活动介绍</a>
+                        <a href="#">活动管理</a>
+                        <a href="#">活动剪影</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <a href="#" class="dropdown">交通推荐</a>
+                </div>
+                <div class="dropdown">
+                    <a href="#" class="dropdown">预约服务</a>
+                    <div class="dropdown-content">
+                        <a href="#">场馆预约</a>
+                        <a href="#">参观申请</a>
+                        <a href="#">服务预定</a>
+                    </div>
+                </div>
+            </ul>
+            <div class="dropdown">
+                <i class="fas fa-search icon"></i>
+            </div>
+            <div class="dropdown">
+                <i class="fas fa-user icon"></i>
+            </div>
+            <div class="dropdown">
+                <i class="fas fa-bars icon"></i>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="flex">
+            <div class="flex-item1">
+                <div class="flex-item">
+                    <div class="runimage">
+                        <img src="images/1轮播.jpg" class="main1">
+                        <img src="images/2轮播.jpg" class="main1">
+                        <img src="images/3轮播.jpg" class="main1">
+                    </div>
+                    <div class="progress">
+                        <div class="progress-inner"></div>
+                    </div>
+                </div>
+                <div class="flex-item">
+                    <div class="runimage">
+                        <img src="images/2轮播.jpg" class="main1">
+                        <img src="images/3轮播.jpg" class="main1">
+                        <img src="images/1轮播.jpg" class="main1">
+                    </div>
+                    <div class="progress">
+                        <div class="progress-inner"></div>
+                    </div>
+                </div>
+                <div class="flex-item">
+                    <div class="runimage">
+                        <img src="images/3轮播.jpg" class="main1">
+                        <img src="images/1轮播.jpg" class="main1">
+                        <img src="images/2轮播.jpg" class="main1">
+                    </div>
+                    <div class="progress">
+                        <div class="progress-inner"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-box1">
+                <div class="flex-box2">
+                    <form class="example"  action="https://www.baidu.com/s" method="get"style="margin:auto;max-width:300px">
+                      <input type="text" name="wd" class="search-input" placeholder="喜欢，您再来">
+                      <button type="submit"><img src="images/搜索.png" height="20px"></button>
+                    </form>
+                </div>
+                <p class="biaoyu1">JUST GO ON </p>
+                <P class="biaoyu2">CRAZY</P>
+            </div>
+            <div class="flex-item3">
+                <div class="photo photo1">
+                    <img src="images/夏叶.jpg">
+                    <div class="photo-label">夏叶</div>
+                </div>
+                <div class="photo photo2">
+                    <img src="images/2.jpg">
+                    <div class="photo-label">航天模型</div>
+                </div>
+                <div class="photo photo3">
+                    <img src="images/梧桐大道.jpg">
+                    <div class="photo-label">梧桐大道</div>
+                </div>
+                <div class="photo photo4">
+                    <img src="images/4.jpg">
+                    <div class="photo-label">兴庆中轴线</div>
+                </div>
+                <div class="photo photo5">
+                    <img src="images/春樱.jpg">
+                    <div class="photo-label">春樱</div>
+                </div>
+            </div>
+
+      <!-- 地图部分 -->
+            <div class="map-section">
+                <div class="map-overlay">
+                    <div class="info-title">校园智慧地图</div>
+
+                    <!-- 天气信息面板 -->
+                    <div class="weather-panel" id="weather-panel">
+                        <div class="weather-header">
+                            <div class="weather-title">交大校园天气</div>
+                            <button class="weather-refresh" id="refresh-weather">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="weather-current">
+                            <div class="weather-icon" id="weather-icon">
+                                <i class="fas fa-sun"></i>
+                            </div>
+                            <div class="weather-temp" id="weather-temp">24°</div>
+                            <div class="weather-details">
+                                <div class="weather-desc" id="weather-desc">晴朗</div>
+                                <div class="weather-info">
+                                    <div class="weather-info-item">
+                                        <i class="fas fa-wind"></i>
+                                        <span id="weather-wind">东南风 3级</span>
+                                    </div>
+                                    <div class="weather-info-item">
+                                        <i class="fas fa-tint"></i>
+                                        <span id="weather-humidity">湿度 45%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="weather-forecast" id="weather-forecast">
+                            <!-- 预报数据将通过JS动态生成 -->
+                        </div>
+                    </div>
+
+                    <div class="map-controls">
+                        <button class="map-btn" id="lock-bounds">
+                            <i class="fas fa-lock"></i> 锁定地图范围
+                        </button>
+                        <button class="map-btn" id="unlock-bounds">
+                            <i class="fas fa-unlock"></i> 取消锁定
+                        </button>
+                    </div>
+                    <div class="search-results" id="search-results"></div>
+                </div>
+                <div id="container"></div>
+            </div>
+
+
+            <!-- 页脚 -->
+            <div class="footer">
+                <div class="p5">© 2025 第六组 管理信息系统让我（5）</div>
+                <div class="p5">组长 潘洋洋</div>
+                <div class="p5">组员 郑海歌 刘小淅 滕芳菲 段佳轩</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: "9b47b403fdb0cb0385b6cce4c6cdf2b5",
+        };
+    </script>
+
+    <script>
+        // 页面加载完成后初始化地图
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化地图
+            const map = new AMap.Map('container', {
+                resizeEnable: true,
+                zoom: 15,
+                center: [108.983715, 34.246162],
+                viewMode: '3D',
+                pitch: 45,
+                mapStyle: 'amap://styles/b9dfe8aa66119f2e457dc8ad12c3538c'
+            });
+
+            // 添加3D控制罗盘
+            AMap.plugin(['AMap.ControlBar'], function() {
+                // 添加3D罗盘控制
+                map.addControl(new AMap.ControlBar({
+                    position: {
+                        right: '20px',
+                        top: '20px'
+                    },
+                    showControlButton: true
+                }));
+            });
+
+            // 添加校园标记点
+           const locations = [
+  {name: "腾飞塔", position: [108.983712, 34.248715],
+   description: "位于钱学森图书馆附近的标志性建筑，象征腾飞与进步",
+   image: "images/腾飞塔.jpg",
+   features: ["标志性建筑", "商业区", "城市地标"]},
+
+  {name: "西花园", position: [108.982743, 34.248507],
+   description: "西安交通大学兴庆校区的西侧花园，环境优美，适合休闲散步",
+   image: "https://example.com/west_garden.jpg",
+   features: ["花园", "休闲", "校园景点"]},
+
+  {name: "东花园", position: [108.984871, 34.248545],
+   description: "位于鄠邑区的东花园，自然风光秀丽，远离城市喧嚣",
+   image: "https://example.com/east_garden.jpg",
+   features: ["自然风光", "宁静", "郊游胜地"]},
+
+  {name: "钱学森图书馆", position: [108.983713, 34.246837],
+   description: "以著名科学家钱学森命名的图书馆，藏书丰富，学术氛围浓厚",
+   image: "images/钱学森图书馆.jpg",
+   features: ["图书馆", "学术", "自习"]},
+
+  {name: "西迁纪念馆", position: [108.984519, 34.242247],
+   description: "纪念西安交通大学西迁历史的纪念馆，展示学校发展历程",
+   image: "https://example.com/west_migration.jpg",
+   features: ["历史", "纪念馆", "文化"]},
+
+  {name: "逸夫科学馆", position: [108.984835, 34.246603],
+   description: "由邵逸夫先生捐建的科学馆，用于科研与学术交流",
+   image: "https://example.com/science_hall.jpg",
+   features: ["科研", "学术交流", "现代化设施"]},
+
+  {name: "四大发明广场", position: [108.983875, 34.245898],
+   description: "以中国古代四大发明为主题的广场，弘扬中华传统文化",
+   image: "https://example.com/inventions_square.jpg",
+   features: ["文化广场", "历史", "开放空间"]},
+
+  {name: "校医院", position: [108.987641, 34.244578],
+   description: "为师生提供医疗服务的校园医院，设施齐全",
+   image: "https://example.com/hospital.jpg",
+   features: ["医疗", "健康", "服务设施"]},
+
+  {name: "西安交通大学招生办公室", position: [108.984662, 34.250819],
+   description: "负责学校招生工作的办公地点，提供招生咨询与服务",
+   image: "https://example.com/admission_office.jpg",
+   features: ["招生", "咨询", "办公"]},
+
+  {name: "西迁纪念广场&创校纪念校门", position: [108.979776, 34.249001],
+   description: "纪念西安交通大学创校历史的校门，具有特殊意义",
+   image: "https://example.com/foundation_gate.jpg",
+   features: ["校门", "历史", "纪念"]},
+
+  {name: "霁月亭", position: [108.982209, 34.242099],
+   description: "校园内的霁月亭，环境幽静，适合休憩与思考",
+   image: "https://example.com/moon_pavilion.jpg",
+   features: ["亭子", "休憩", "自然"]},
+
+  {name: "初阳亭", position: [108.983073, 34.242338],
+   description: "校园内的初阳亭，晨光中尤为美丽，象征希望与新生",
+   image: "https://example.com/sun_pavilion.jpg",
+   features: ["亭子", "晨景", "象征"]},
+
+  {name: "梧桐超市", position: [108.939645, 34.343207],
+   description: "校园生活便利超市，提供各类日常用品和零食",
+   image: "https://example.com/wutong_mart.jpg",
+   features: ["便利店", "生活用品", "零食饮料"]},
+
+  {name: "教学主楼（ABCD）E", position: [108.98352, 34.244712],
+   description: "西安交通大学核心教学区，现代化教学设施完善",
+   image: "images/教学主楼.jpg",
+   features: ["教学楼", "自习室", "多媒体教室"]},
+
+  {name: "仲英书院", position: [108.986432, 34.245234],
+   description: "现代化书院社区，注重学生全面发展",
+   image: "https://example.com/academy.jpg",
+   features: ["书院制", "学生社区", "文化活动"]},
+
+  {name: "励志书院", position: [108.985938, 34.244345],
+   description: "以励志教育为特色的书院，培养学生创新精神",
+   image: "https://example.com/inspire_academy.jpg",
+   features: ["创新教育", "学业辅导", "导师制"]},
+
+  {name: "南洋书院", position: [108.986104, 34.243818],
+   description: "历史悠久的书院制社区，传统与现代教育融合",
+   image: "https://example.com/nanyang_academy.jpg",
+   features: ["文化传承", "学生自治", "社团活动"]},
+
+  {name: "崇实书院", position: [108.98179, 34.243108],
+   description: "注重实践能力培养的书院社区",
+   image: "https://example.com/chongshi_academy.jpg",
+   features: ["实践教育", "创新能力", "社区活动"]},
+
+  {name: "文治书院", position: [108.980538, 34.24251],
+   description: "人文素养培育基地，传统文化教育社区",
+   image: "https://example.com/wenzhi_academy.jpg",
+   features: ["人文教育", "传统文化", "书院生活"]},
+
+  {name: "彭康书院", position: [108.986489, 34.242213],
+   description: "以首任校长命名，创新人才培养示范区",
+   image: "https://example.com/pengkang_academy.jpg",
+   features: ["示范书院", "创新教育", "学术沙龙"]},
+
+  {name: "宗濂书院", position: [108.982716, 34.243466],
+   description: "医学特色书院，培养医学专业人才",
+   image: "https://example.com/zonglian_academy.jpg",
+   features: ["医学教育", "健康科学", "书院社区"]},
+
+  {name: "钱学森书院", position: [108.981697, 34.243915],
+   description: "拔尖创新人才培养基地，荣誉教育示范区",
+   image: "https://example.com/qian_academy.jpg",
+   features: ["荣誉教育", "创新培养", "学术卓越"]},
+
+  {name: "梧桐苑", position: [108.981853, 34.244866],
+   description: "学生餐饮中心，提供多样化的美食选择",
+   image: "https://example.com/wutongyuan.jpg",
+   features: ["学生食堂", "美食广场", "休闲餐饮"]},
+
+  {name: "康桥苑", position: [108.985904, 34.244769],
+   description: "大型学生餐厅，汇集各地风味美食",
+   image: "https://example.com/canteen.jpg",
+   features: ["学生食堂", "餐饮中心", "休闲餐饮"]},
+
+  {name: "思源活动中心", position: [108.983679, 34.242815],
+   description: "学生组织活动基地，校园文化展示中心",
+   image: "https://example.com/student_center.jpg",
+   features: ["学生活动", "社团基地", "文艺演出"]},
+
+  {name: "饮水思源碑", position: [108.98372, 34.250468],
+   description: "象征交大精神的纪念碑，寓意感恩与传承",
+   image: "images/饮水思源.jpg",
+   features: ["校园地标", "精神象征", "毕业留念"]},
+
+  {name: "保卫处", position: [108.98677, 34.244414],
+   description: "校园安全保卫指挥中心",
+   image: "https://example.com/security.jpg",
+   features: ["安全管理", "治安维护", "应急处理"]},
+
+  {name: "西安交通大学博物馆&秦腔博物馆", position: [108.980224, 34.241587],
+   description: "展示学校历史与陕西秦腔文化的综合性博物馆",
+   image: "https://example.com/museum.jpg",
+   features: ["校史展览", "文化传承", "艺术展示"]},
+
+  {name: "北门", position: [108.983729, 34.250952],
+   description: "校园北侧主要出入口，交通便利",
+   image: "images/北门.jpg",
+   features: ["校门", "出入口", "交通枢纽"]},
+
+  {name: "南门", position: [108.983849, 34.241577],
+   description: "校园正门，设有校名石和景观广场",
+   image: "https://example.com/south_gate.jpg",
+   features: ["主校门", "地标", "合影点"]}
+];
+
+            // 构建自定义信息窗体函数
+            function createInfoWindow(title, content, image, features) {
+                var info = document.createElement("div");
+                info.className = "custom-info input-card content-window-card";
+                info.style.width = "350px";
+
+                // 顶部区域
+                var top = document.createElement("div");
+                var titleD = document.createElement("div");
+                var closeX = document.createElement("img");
+                top.className = "info-top";
+                titleD.innerHTML = title;
+                closeX.src = "https://webapi.amap.com/images/close2.gif";
+                closeX.onclick = closeInfoWindow;
+
+                top.appendChild(titleD);
+                top.appendChild(closeX);
+                info.appendChild(top);
+
+                // 中部内容
+                var middle = document.createElement("div");
+                middle.className = "info-middle";
+                middle.style.backgroundColor = 'white';
+
+                // 添加图片
+                var img = document.createElement("img");
+                img.src = image;
+                img.alt = title;
+                middle.appendChild(img);
+
+                // 添加描述
+                var desc = document.createElement("p");
+                desc.innerHTML = content;
+                middle.appendChild(desc);
+
+                // 添加特征标签
+                if(features && features.length > 0) {
+                    var featureContainer = document.createElement("div");
+                    featureContainer.className = "info-feature";
+
+                    features.forEach(feature => {
+                        var tag = document.createElement("span");
+                        tag.className = "feature-tag";
+                        tag.textContent = feature;
+                        featureContainer.appendChild(tag);
+                    });
+
+                    middle.appendChild(featureContainer);
+                }
+
+                // 添加详情链接
+                var link = document.createElement("a");
+                link.href = "#";
+                link.className = "info-link";
+                link.textContent = "查看详情";
+                link.onclick = function() {
+                    alert("将跳转到" + title + "的详情页面");
+                };
+                middle.appendChild(link);
+
+                // 添加经纬度信息
+                var coord = document.createElement("p");
+                coord.innerHTML = "<strong>经纬度：</strong><span class='lnglat'>108.xxx, 34.xxx</span>";
+                middle.appendChild(coord);
+
+                info.appendChild(middle);
+
+                // 底部区域
+                var bottom = document.createElement("div");
+                bottom.className = "info-bottom";
+                bottom.style.position = 'relative';
+                bottom.style.top = '0px';
+                bottom.style.margin = '0 auto';
+                var sharp = document.createElement("img");
+                sharp.src = "https://webapi.amap.com/images/sharp.png";
+                bottom.appendChild(sharp);
+                info.appendChild(bottom);
+
+                return info;
+            }
+
+            // 关闭信息窗体函数
+            function closeInfoWindow() {
+                map.clearInfoWindow();
+            }
+
+            // 添加标记和信息窗口
+            locations.forEach(loc => {
+                const marker = new AMap.Marker({
+                    position: loc.position,
+                    map: map,
+                    title: loc.name,
+                    extData: loc
+                });
+
+                // 创建信息窗体内容
+                const content = createInfoWindow(
+                    loc.name,
+                    loc.description,
+                    loc.image,
+                    loc.features
+                );
+
+                // 实例化信息窗体
+                const infoWindow = new AMap.InfoWindow({
+                    isCustom: true,
+                    content: content,
+                    offset: new AMap.Pixel(16, -45)
+                });
+
+                // 绑定点击事件
+                marker.on('click', function() {
+                    infoWindow.open(map, marker.getPosition());
+                });
+            });
+
+            // 地图范围控制
+            const bounds = new AMap.Bounds(
+                [108.979328, 34.241348],
+                [108.998102, 34.260976]
+            );
+
+            // 初始设置地图边界
+            map.setLimitBounds(bounds);
+
+            // 锁定按钮事件
+            document.getElementById('lock-bounds').addEventListener('click', function() {
+                map.setLimitBounds(bounds);
+                map.setBounds(bounds);
+                showMessage('已锁定地图显示范围');
+            });
+
+            // 解锁按钮事件
+            document.getElementById('unlock-bounds').addEventListener('click', function() {
+                map.clearLimitBounds();
+                showMessage('已取消地图范围限制');
+            });
+
+            // 显示消息的函数
+            function showMessage(msg) {
+                const resultsDiv = document.getElementById('search-results');
+                resultsDiv.innerHTML = `<div class="result-item">${msg}</div>`;
+                setTimeout(() => {
+                    resultsDiv.innerHTML = '';
+                }, 3000);
+            }
+
+            // 返回顶部功能
+            const backToTopBtn = document.getElementById('myBtn');
+
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.style.display = 'block';
+                } else {
+                    backToTopBtn.style.display = 'none';
+                }
+            });
+
+            backToTopBtn.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            // 导航栏滚动效果
+            const nav = document.querySelector('.flex-container');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    nav.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.1)';
+                } else {
+                    nav.style.boxShadow = '0 2px 15px rgba(0, 0, 0, 0.1)';
+                }
+            });
+             // 初始化天气功能
+            initWeather();
+        });
+
+          // 天气功能初始化
+        function initWeather() {
+            // 初始化高德天气插件
+            AMap.plugin('AMap.Weather', function() {
+                const weather = new AMap.Weather();
+
+                // 获取天气并更新UI
+                function updateWeather() {
+                    // 获取实时天气
+                    weather.getLive('西安市', function(err, liveData) {
+                        if (!err) {
+                            updateWeatherUI(liveData);
+                        }
+                    });
+
+                    // 获取天气预报
+                    weather.getForecast('西安市', function(err, forecastData) {
+                        if (!err) {
+                            updateForecastUI(forecastData.forecasts);
+                        }
+                    });
+                }
+
+                // 更新实时天气UI
+                function updateWeatherUI(data) {
+                    document.getElementById('weather-temp').textContent = data.temperature + '°';
+                    document.getElementById('weather-desc').textContent = data.weather;
+                    document.getElementById('weather-wind').textContent = data.windDirection + ' ' + data.windPower + '级';
+                    document.getElementById('weather-humidity').textContent = '湿度 ' + data.humidity + '%';
+
+                    // 根据天气类型设置图标
+                    const weatherIcon = document.getElementById('weather-icon');
+                    const weatherType = data.weather.toLowerCase();
+                    let iconClass = 'fas fa-sun';
+
+                    if (weatherType.includes('雨')) {
+                        iconClass = 'fas fa-cloud-rain';
+                    } else if (weatherType.includes('云') || weatherType.includes('阴')) {
+                        iconClass = 'fas fa-cloud';
+                    } else if (weatherType.includes('雪')) {
+                        iconClass = 'fas fa-snowflake';
+                    } else if (weatherType.includes('雾')) {
+                        iconClass = 'fas fa-smog';
+                    }
+
+                    weatherIcon.innerHTML = `<i class="${iconClass}"></i>`;
+                }
+
+                // 更新天气预报UI
+                function updateForecastUI(forecasts) {
+                    const forecastContainer = document.getElementById('weather-forecast');
+                    forecastContainer.innerHTML = '';
+
+                    // 只显示未来4天的预报
+                    const daysToShow = Math.min(4, forecasts.length);
+
+                    for (let i = 0; i < daysToShow; i++) {
+                        const forecast = forecasts[i];
+                        const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                        const date = new Date(forecast.date);
+                        const dayName = dayNames[date.getDay()];
+
+                        let iconClass = 'fas fa-sun';
+                        const weatherType = forecast.dayWeather.toLowerCase();
+
+                        if (weatherType.includes('雨')) {
+                            iconClass = 'fas fa-cloud-rain';
+                        } else if (weatherType.includes('云') || weatherType.includes('阴')) {
+                            iconClass = 'fas fa-cloud';
+                        } else if (weatherType.includes('雪')) {
+                            iconClass = 'fas fa-snowflake';
+                        }
+
+                        forecastContainer.innerHTML += `
+                            <div class="forecast-item">
+                                <div class="forecast-day">${dayName}</div>
+                                <div class="forecast-icon"><i class="${iconClass}"></i></div>
+                                <div class="forecast-temp">${forecast.nightTemp}~${forecast.dayTemp}°</div>
+                            </div>
+                        `;
+                    }
+                }
+
+                // 初始获取天气
+                updateWeather();
+
+                // 绑定刷新按钮
+                document.getElementById('refresh-weather').addEventListener('click', function() {
+                    this.classList.add('refreshing');
+                    updateWeather();
+                    setTimeout(() => {
+                        this.classList.remove('refreshing');
+                    }, 1000);
+                });
+            });
+        }
+    </script>
+
+
+
+
+    <!-- Coze智能体集成 -->
+    <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.8/libs/cn/index.js"></script>
+    <script>
+<!-- Coze智能体集成 -->
+    <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.8/libs/cn/index.js"></script>
+    <script>
+        // 初始化Coze智能体
+        let cozeClient;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 创建Coze智能体客户端
+            cozeClient = new CozeWebSDK.WebChatClient({
+                config: {
+                    bot_id: '7512475822935015464'
+                },
+                auth: {
+                    type: 'token',
+                    token: 'pat_SE1JURXOnl2HCWbepOttaa5aJ3jhIjEE8XAvQZJd9W2jksSF5mkFTz93iO2xskMF'
+                },
+                userInfo: {
+                    id: 'xjtu_visitor',
+                    url: 'https://www.xjtu.edu.cn/images/logo.png',
+                    nickname: '交大访客'
+                },
+                ui: {
+                    base: {
+                        icon: 'https://www.xjtu.edu.cn/images/logo.png',
+                        layout: 'pc',
+                        lang: 'zh-CN',
+                        zIndex: 1001
+                    },
+                    chatBot: {
+                        title: '西安交大校园助手',
+                        uploadable: true,
+                        width: 360,
+                        height: 500
+                    },
+                    asstBtn: {
+                        isNeed: false // 使用自定义按钮
+                    },
+                    footer: {
+                        isShow: true,
+                        expressionText: 'Powered by 西安交通大学 & Coze',
+                        linkvars: {
+                            name: {
+                                text: '西安交大',
+                                link: 'https://www.xjtu.edu.cn'
+                            },
+                            name1: {
+                                text: 'Coze',
+                                link: 'https://www.coze.com'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 自定义按钮触发Coze智能体
+            const cozeBtn = document.getElementById('coze-assistant-btn');
+            cozeBtn.addEventListener('click', function() {
+                // 切换按钮状态
+                cozeBtn.classList.toggle('coze-active');
+
+                if (cozeBtn.classList.contains('coze-active')) {
+                    // 打开聊天窗口
+                    cozeClient.open();
+                    cozeBtn.innerHTML = '<i class="fas fa-times"></i><div class="coze-assistant-label">关闭助手</div>';
+                } else {
+                    // 关闭聊天窗口
+                    cozeClient.close();
+                    cozeBtn.innerHTML = '<i class="fas fa-robot"></i><div class="coze-assistant-label">校园智能助手</div>';
+                }
+            })
+        })
+
+        <!-- Install SDK -->
+  <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.8/libs/cn/index.js"></script>
+  <script>
+    new CozeWebSDK.WebChatClient({
+      /**
+       * Agent or app settings
+       * for agent
+       * @param config.bot_id - Agent ID.
+       * for app
+       * @param config.type - To integrate a Coze app, you must set the value to app.
+       * @param config.appInfo.appId - AI app ID.
+       * @param config.appInfo.workflowId - Workflow or chatflow ID.
+       */
+      config: {
+        bot_id: '7512475822935015464', // Replace with your Agent ID
+      },
+      /**
+       * The auth property is used to configure the authentication method.
+       * @param type - Authentication method, default type is 'unauth', which means no authentication is required; it is recommended to set it to 'token', which means authentication is done through PAT (Personal Access Token) or OAuth.
+       * @param token - When the type is set to 'token', you need to configure the PAT (Personal Access Token) or OAuth access key.
+       * @param onRefreshToken - When the access key expires, a new key can be set as needed.
+       */
+      auth:  {
+        type: 'token',
+        token: 'pat_SE1JURXOnl2HCWbepOttaa5aJ3jhIjEE8XAvQZJd9W2jksSF5mkFTz93iO2xskMF', // Replace with your PAT or OAuth access key
+        onRefreshToken: async () => '', // Optional: Implement token refresh logic here
+      },
+      /**
+       * The userInfo parameter is used to set the display of agent user information in the chat box.
+       * @param userInfo.id - ID of the agent user.
+       * @param userInfo.url - URL address of the user's avatar.
+       * @param userInfo.nickname - Nickname of the agent user.
+       */
+      userInfo: {
+        id: 'user',
+        url: 'https://lf-coze-web-cdn.coze.cn/obj/coze-web-cn/obric/coze/favicon.1970.png',
+        nickname: 'UserA',
+      },
+      ui: {
+        /**
+         * The ui.base parameter is used to add the overall UI effect of the chat window.
+         * @param base.icon - Application icon URL.
+         * @param base.layout - Layout style of the agent chat box window, which can be set as 'pc' or'mobile'.
+         * @param base.lang - System language of the agent, which can be set as 'en' or 'zh-CN'.
+         * @param base.zIndex - The z-index of the chat box.
+         */
+        base: {
+          icon: 'https://lf-coze-web-cdn.coze.cn/obj/coze-web-cn/obric/coze/favicon.1970.png',
+          layout: 'pc',
+          lang: 'en',
+          zIndex: 1000,
+        },
+        /**
+         * Control the UI and basic capabilities of the chat box.
+         * @param chatBot.title - The title of the chatbox
+         * @param chatBot.uploadable - Whether file uploading is supported.
+         * @param chatBot.width - The width of the agent window on PC is measured in px, default is 460.
+         * @param chatBot.el - Container for setting the placement of the chat box (Element).
+         */
+        chatBot: {
+          title: 'Coze Bot',
+          uploadable: true,
+          width: 390
+        },
+        /**
+         * Controls whether to display the floating ball at the bottom right corner of the page.
+         */
+        asstBtn: {
+          isNeed: true,
+        },
+        /**
+         * The ui.footer parameter is used to add the footer of the chat window.
+         * @param footer.isShow - Whether to display the bottom copy module.
+         * @param footer.expressionText - The text information displayed at the bottom.
+         * @param footer.linkvars - The link copy and link address in the footer.
+         */
+        footer: {
+          isShow: true,
+          expressionText: 'Powered by &',
+          linkvars: {
+            name: {
+              text: 'A',
+              link: 'https://www.test1.com'
+            },
+            name1: {
+              text: 'B',
+              link: 'https://www.test2.com'
+            }
+          }
+        }
+      },
+    });
+
+    </script>
+
+</script>
+</body>
+</html>
