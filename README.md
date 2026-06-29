@@ -1,5 +1,7 @@
 # XJTU 智慧校园游
 
+**[在线体验](https://yaalo-o.github.io/xjtu-campus-tour/)**
+
 西安交通大学校园导览网页应用。集成高德地图 3D 地图、校园天气面板、景点轮播、照片墙和 Coze AI 聊天助手。
 
 ## 功能特性
@@ -18,23 +20,20 @@
 
 ```
 xjtu-campus-tour/
-├── index.html              # 主页面（数据驱动）
+├── index.html              # 首页（3D 地图 + 天气 + 时间线）
+├── landmarks.html          # 景点介绍（34 个景点浏览）
+├── activities.html         # 全部活动（6 类校园活动）
+├── transport.html          # 交通推荐（到达方式 + 地图）
+├── config.example.js       # 配置文件模板（API 密钥）
 ├── css/
 │   └── style.css           # 统一样式表
 ├── js/
 │   ├── app.js              # 主逻辑（分类、搜索、详情面板、天气）
-│   ├── map.js              # 地图初始化、标记、信息窗体
-│   ├── carousel.js         # 轮播组件
+│   ├── map.js              # 地图初始化、标记、信息窗体、全景
 │   └── chat.js             # Coze AI 集成
 ├── data/
-│   └── landmarks.js        # 结构化景点数据（30+ 景点）
+│   └── landmarks.js        # 结构化景点数据（34 景点 + 6 时间线节点）
 ├── images/                 # 校园照片和图标
-│   ├── 1轮播.jpg ~ 3轮播.jpg   # 轮播图
-│   ├── 腾飞塔.jpg ~ 北门.jpg   # 景点照片
-│   ├── 夏叶.jpg ~ 春樱.jpg     # 校园风光
-│   ├── logo.png                # 学校 logo
-│   └── 导航栏*.png / 搜索.png  # UI 图标
-├── 智慧校园游第六组2.pptx    # 项目展示 PPT
 └── README.md
 ```
 
@@ -60,6 +59,20 @@ xjtu-campus-tour/
 - `aiPrompt` — AI 问答预设问题
 
 地图标记、搜索、分类筛选、详情面板均由此数据驱动。
+
+## 本地开发
+
+1. 克隆仓库
+   ```bash
+   git clone https://github.com/YaaLO-o/xjtu-campus-tour.git
+   ```
+
+2. 复制配置文件并填入你的 API 密钥
+   ```bash
+   cp config.example.js config.js
+   ```
+
+3. 用浏览器打开 `index.html` 即可预览
 
 ## 许可
 
