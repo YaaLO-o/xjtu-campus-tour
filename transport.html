@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="西安交通大学交通指南，提供地铁、公交、自驾等多种到达方式及校园内交通信息。">
+    <title>XJTU智慧校园游 - 交通推荐</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
+
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: "9b47b403fdb0cb0385b6cce4c6cdf2b5",
+        };
+    </script>
+
+    <script src="https://webapi.amap.com/maps?v=2.0&key=c3671efe6405aa35284c356354f6ad81"></script>
+    <script src="https://webapi.amap.com/ui/1.1/main.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .transport-hero {
+            margin-top: 90px;
+            padding: 80px 40px 60px;
+            text-align: center;
+            background: linear-gradient(135deg, #1a5276, #2e86c1);
+            border-radius: 0;
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+        }
+
+        .transport-hero h1 {
+            font-size: 48px;
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .transport-hero p {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .content-section {
+            width: 100%;
+            padding: 0 40px 50px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-left: 15px;
+            border-left: 4px solid #3498db;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 20px;
+        }
+
+        .card-grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .info-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .info-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .info-card-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #fff;
+        }
+
+        .info-card:nth-child(2) .info-card-icon {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .info-card:nth-child(3) .info-card-icon {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .info-card h3 {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .info-card p {
+            font-size: 14px;
+            color: #7f8c8d;
+            line-height: 1.7;
+        }
+
+        .info-card-h {
+            text-align: left;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .info-card-h .info-card-icon {
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .info-tag {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .info-tag.green {
+            background: #e8f8f0;
+            color: #27ae60;
+        }
+
+        .info-tag.orange {
+            background: #fef5e7;
+            color: #e67e22;
+        }
+
+        #transport-map {
+            width: 100%;
+            height: 450px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .map-legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.north { background: #e74c3c; }
+        .legend-dot.south { background: #3498db; }
+        .legend-dot.se { background: #27ae60; }
+        .legend-dot.sw { background: #f39c12; }
+
+        .footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.85);
+            width: 100%;
+            padding: 40px 0;
+            margin-top: 40px;
+        }
+
+        .footer .p5 {
+            font-size: 18px;
+            color: #ddd;
+            margin: 8px 0;
+        }
+
+        #myBtn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 99;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-size: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .transport-hero {
+                padding: 60px 20px 40px;
+            }
+
+            .transport-hero h1 {
+                font-size: 32px;
+            }
+
+            .content-section {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .info-card-h {
+                flex-direction: column;
+                text-align: center;
+                align-items: center;
+            }
+
+            #transport-map {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="myBtn" aria-label="返回顶部"><i class="fas fa-arrow-up"></i></button>
+
+    <div class="flex">
+        <!-- 导航栏 -->
+        <div class="flex-container">
+            <div class="logo">
+                <a href="https://www.xjtu.edu.cn/" target="_blank"><img src="images/logo.png" class="logo" alt="西安交通大学"></a>
+            </div>
+            <ul>
+                <div class="dropdown">
+                    <a href="index.html" class="dropdown">首页</a>
+                </div>
+                <div class="dropdown">
+                    <a href="landmarks.html" class="dropdown">景点介绍</a>
+                </div>
+                <div class="dropdown">
+                    <a href="activities.html" class="dropdown">全部活动</a>
+                </div>
+                <div class="dropdown">
+                    <a href="transport.html" class="dropdown" style="color:#e74c3c; font-weight:600;">交通推荐</a>
+                </div>
+                <div class="dropdown">
+                    <a href="https://zajdcl.xjtu.edu.cn/ucdtmas-h5/visit-index" class="dropdown" target="_blank">预约服务</a>
+                    <div class="dropdown-content">
+                        <a href="https://zajdcl.xjtu.edu.cn/ucdtmas-h5/visit-index" target="_blank">场馆预约</a>
+                        <a href="https://zajdcl.xjtu.edu.cn/ucdtmas-h5/visit-index" target="_blank">参观申请</a>
+                        <a href="https://zajdcl.xjtu.edu.cn/ucdtmas-h5/visit-index" target="_blank">服务预定</a>
+                    </div>
+                </div>
+            </ul>
+            <div class="dropdown">
+                <i class="fas fa-search icon" role="button" tabindex="0" aria-label="搜索"></i>
+            </div>
+            <div class="dropdown">
+                <i class="fas fa-user icon" role="button" tabindex="0" aria-label="用户"></i>
+            </div>
+            <div class="dropdown">
+                <i class="fas fa-bars icon" role="button" tabindex="0" aria-label="菜单"></i>
+            </div>
+        </div>
+
+        <div class="flex">
+            <!-- Hero -->
+            <div class="transport-hero">
+                <h1>交通指南</h1>
+                <p>便捷到达西安交通大学</p>
+            </div>
+
+            <!-- 到达方式 -->
+            <div class="content-section">
+                <div class="section-title">到达方式</div>
+                <div class="card-grid">
+                    <div class="info-card">
+                        <div class="info-card-icon"><i class="fas fa-subway"></i></div>
+                        <h3>地铁</h3>
+                        <p>乘坐地铁3号线至【咸宁路站】，B出口步行约10分钟到达</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-icon"><i class="fas fa-bus"></i></div>
+                        <h3>公交</h3>
+                        <p>多路公交直达：7路、45路、402路、607路等至【交大南门站】</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-icon"><i class="fas fa-car"></i></div>
+                        <h3>自驾</h3>
+                        <p>导航至"西安交通大学兴庆校区"，北门/南门均可进入</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 校园交通 -->
+            <div class="content-section">
+                <div class="section-title">校园交通</div>
+                <div class="card-grid">
+                    <div class="info-card">
+                        <div class="info-card-icon" style="background:linear-gradient(135deg,#27ae60,#1e8449);"><i class="fas fa-shuttle-van"></i></div>
+                        <h3>校园巴士</h3>
+                        <p>校内设有免费巴士，连接各主要教学区和生活区</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-icon" style="background:linear-gradient(135deg,#e74c3c,#c0392b);"><i class="fas fa-bicycle"></i></div>
+                        <h3>共享单车</h3>
+                        <p>校园内设有多个共享单车停放点，方便快捷</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-icon" style="background:linear-gradient(135deg,#f39c12,#e67e22);"><i class="fas fa-walking"></i></div>
+                        <h3>步行指南</h3>
+                        <p>校园面积适中，主要景点步行15分钟内可达</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 停车信息 -->
+            <div class="content-section">
+                <div class="section-title">停车信息</div>
+                <div class="card-grid card-grid-2">
+                    <div class="info-card info-card-h">
+                        <div class="info-card-icon" style="background:linear-gradient(135deg,#3498db,#2980b9);"><i class="fas fa-parking"></i></div>
+                        <div>
+                            <h3>北门停车场</h3>
+                            <p>社会车辆可从北门进入，停车费2元/小时</p>
+                            <span class="info-tag green"><i class="fas fa-check-circle"></i> 无需预约</span>
+                        </div>
+                    </div>
+                    <div class="info-card info-card-h">
+                        <div class="info-card-icon" style="background:linear-gradient(135deg,#e67e22,#d35400);"><i class="fas fa-parking"></i></div>
+                        <div>
+                            <h3>南门停车场</h3>
+                            <p>访客车辆需提前预约，凭预约码进入</p>
+                            <span class="info-tag orange"><i class="fas fa-calendar-check"></i> 需提前预约</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 地图 -->
+            <div class="content-section">
+                <div class="section-title">校园地图</div>
+                <div id="transport-map" aria-label="校园交通地图" role="application"></div>
+                <div class="map-legend">
+                    <div class="legend-item"><div class="legend-dot north"></div><span>北门</span></div>
+                    <div class="legend-item"><div class="legend-dot south"></div><span>南门</span></div>
+                    <div class="legend-item"><div class="legend-dot se"></div><span>东南门</span></div>
+                    <div class="legend-item"><div class="legend-dot sw"></div><span>西南门</span></div>
+                </div>
+            </div>
+
+            <!-- 页脚 -->
+            <div class="footer">
+                <div class="p5">&copy; 2026 XJTU 智慧校园游</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('scroll', function() {
+            var btn = document.getElementById('myBtn');
+            btn.style.display = window.pageYOffset > 300 ? 'block' : 'none';
+        });
+        document.getElementById('myBtn').addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        var map = new AMap.Map('transport-map', {
+            resizeEnable: true,
+            zoom: 15,
+            center: [108.983715, 34.246162],
+            mapStyle: 'amap://styles/b9dfe8aa66119f2e457dc8ad12c3538c'
+        });
+
+        var gates = [
+            { name: '北门', pos: [108.983729, 34.250952], color: '#e74c3c' },
+            { name: '南门', pos: [108.983849, 34.241577], color: '#3498db' },
+            { name: '东南门', pos: [108.987500, 34.242800], color: '#27ae60' },
+            { name: '西南门', pos: [108.980200, 34.242800], color: '#f39c12' }
+        ];
+
+        gates.forEach(function(g) {
+            var marker = new AMap.Marker({
+                position: g.pos,
+                map: map,
+                title: g.name,
+                content: '<div style="background:' + g.color + ';color:white;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:500;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2);">' + g.name + '</div>',
+                offset: new AMap.Pixel(-20, -10)
+            });
+        });
+
+        map.setFitView();
+    </script>
+</body>
+</html>

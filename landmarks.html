@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="西安交通大学校园景点介绍，包括腾飞塔、钱学森图书馆、西花园等34个特色景点的详细信息。">
+    <title>景点介绍 - XJTU智慧校园游</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
+
+    <!-- 高德地图安全配置（必须在 API 之前） -->
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: "9b47b403fdb0cb0385b6cce4c6cdf2b5",
+        };
+    </script>
+
+    <!-- 高德地图 JS API -->
+    <script src="https://webapi.amap.com/maps?v=2.0&key=c3671efe6405aa35284c356354f6ad81&plugin=AMap.Panorama"></script>
+
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 样式 -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* ========== 景点介绍页专属样式 ========== */
+
+        .hero-section {
+            margin-top: 90px;
+            padding: 80px 40px 60px;
+            text-align: center;
+            background: linear-gradient(135deg, #2c3e50, #4a235a);
+            border-radius: 0;
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+        }
+
+        .hero-title {
+            font-size: 48px;
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+        }
+
+        /* 搜索框 */
+        .search-bar {
+            width: 90%;
+            max-width: 1000px;
+            margin: 0 auto 10px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 14px 50px 14px 20px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            outline: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-bar .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+        }
+
+        /* 分类筛选栏 */
+        .filter-section {
+            width: 100%;
+            padding: 20px 40px 0;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 5px 0 15px;
+            scrollbar-width: none;
+        }
+
+        .filter-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-tag {
+            padding: 8px 20px;
+            border-radius: 25px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            color: #555;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .filter-tag:hover {
+            border-color: #ff9a9e;
+            color: #ff6b6b;
+        }
+
+        .filter-tag.active {
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(255, 154, 158, 0.4);
+        }
+
+        .filter-tag .count {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-left: 4px;
+        }
+
+        /* 详情面板 */
+        .detail-panel {
+            width: 100%;
+            padding: 0 40px;
+            display: none;
+        }
+
+        .detail-panel.visible {
+            display: block;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .detail-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .detail-category {
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .detail-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f1f1;
+            color: #666;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .detail-close:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .detail-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .detail-image {
+            border-radius: 15px;
+            overflow: hidden;
+            height: 300px;
+        }
+
+        .detail-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .detail-image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #ffecd2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: bold;
+        }
+
+        .detail-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .detail-desc {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .detail-history {
+            background: #f0f7ff;
+            border-radius: 12px;
+            padding: 15px 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .detail-history h4 {
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-history p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .detail-tips {
+            background: #fff9e6;
+            border-radius: 12px;
+            padding: 15px 20px;
+            border-left: 4px solid #f39c12;
+        }
+
+        .detail-tips h4 {
+            font-size: 14px;
+            color: #856404;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-tips p {
+            font-size: 14px;
+            color: #856404;
+            line-height: 1.7;
+        }
+
+        .detail-nearby {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px 20px;
+        }
+
+        .detail-nearby h4 {
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-nearby-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .detail-nearby-tag {
+            padding: 5px 14px;
+            border-radius: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .detail-btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-btn.primary {
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+        }
+
+        .detail-btn.secondary {
+            background: #f8f9fa;
+            color: #2c3e50;
+            border: 1px solid #ddd;
+        }
+
+        .detail-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 景点网格 */
+        .grid-section {
+            width: 100%;
+            padding: 0 40px 60px;
+        }
+
+        .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-top: 10px;
+        }
+
+        .grid-count {
+            font-size: 16px;
+            color: #777;
+        }
+
+        .grid-count span {
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .landmarks-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        /* 景点卡片 */
+        .landmark-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .landmark-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .landmark-card.highlighted {
+            animation: glowPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 0 3px #ff9a9e, 0 10px 30px rgba(255, 154, 158, 0.3);
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 0 3px #ff9a9e, 0 10px 30px rgba(255, 154, 158, 0.3); }
+            50% { box-shadow: 0 0 0 6px #ff9a9e, 0 10px 40px rgba(255, 154, 158, 0.5); }
+        }
+
+        .card-image {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .landmark-card:hover .card-image img {
+            transform: scale(1.08);
+        }
+
+        .card-image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #ffecd2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: bold;
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .card-body {
+            padding: 18px 20px;
+        }
+
+        .card-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: #777;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .card-tag {
+            padding: 3px 10px;
+            border-radius: 15px;
+            background: #f1f3f5;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .card-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .card-btn:hover {
+            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* 无结果提示 */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 16px;
+            grid-column: 1 / -1;
+        }
+
+        .no-results i {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .landmarks-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .detail-body {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-image {
+                height: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 36px;
+            }
+
+            .hero-subtitle {
+                font-size: 16px;
+            }
+
+            .filter-section,
+            .grid-section,
+            .detail-panel {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .landmarks-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-card {
+                padding: 20px;
+            }
+
+            .detail-name {
+                font-size: 22px;
+            }
+
+            .detail-actions {
+                flex-direction: column;
+            }
+
+            .card-image {
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="myBtn" aria-label="返回顶部"><i class="fas fa-arrow-up"></i></button>
+
+    <div class="flex">
+        <!-- 导航栏 -->
+        <div class="flex-container">
+            <div class="logo">
+                <a href="https://www.xjtu.edu.cn/" target="_blank"><img src="images/logo.png" class="logo" alt="西安交通大学"></a>
+            </div>
+            <ul>
+                <div class="dropdown">
+                    <a href="index.html" class="dropdown">首页</a>
+                </div>
+                <div class="dropdown">
+                    <a href="landmarks.html" class="dropdown" style="color:#e74c3c; font-weight:600;">景点介绍</a>
+                </div>
+                <div class="dropdown">
+                    <a href="activities.html" class="dropdown">全部活动</a>
+                    <div class="dropdown-content">
+                        <a href="activities.html">活动介绍</a>
+                        <a href="activities.html">活动管理</a>
+                        <a href="activities.html">活动剪影</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <a href="transport.html" class="dropdown">交通推荐</a>
+                </div>
+                <div class="dropdown">
+                    <a href="https://zajdcl.xjtu.edu.cn/ucdtmas-h5/visit-index" class="dropdown" target="_blank">预约服务</a>
+                    <div class="dropdown-content">
+                        <a href="https://zajdcl.xjtu.edu.cn/ucdtmas-h5/visit-index" target="_blank">场馆预约</a>
+                        <a href="https://zajdcl.xjtu.edu.cn/ucdtmas-h5/visit-index" target="_blank">参观申请</a>
+                        <a href="https://zajdcl.xjtu.edu.cn/ucdtmas-h5/visit-index" target="_blank">服务预定</a>
+                    </div>
+                </div>
+            </ul>
+            <div class="dropdown">
+                <i class="fas fa-search icon" role="button" tabindex="0" aria-label="搜索"></i>
+            </div>
+            <div class="dropdown">
+                <i class="fas fa-user icon" role="button" tabindex="0" aria-label="用户"></i>
+            </div>
+            <div class="dropdown">
+                <i class="fas fa-bars icon" role="button" tabindex="0" aria-label="菜单"></i>
+            </div>
+        </div>
+
+        <!-- Hero 区域 -->
+        <div class="hero-section">
+            <h1 class="hero-title">校园景点</h1>
+            <p class="hero-subtitle">探索西安交大的每一处风景</p>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="搜索景点名称、特征...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+        </div>
+
+        <!-- 分类筛选 -->
+        <div class="filter-section">
+            <div class="filter-bar" id="filterBar"></div>
+        </div>
+
+        <!-- 详情面板 -->
+        <div class="detail-panel" id="detailPanel"></div>
+
+        <!-- 景点网格 -->
+        <div class="grid-section">
+            <div class="grid-header">
+                <div class="grid-count">共 <span id="gridCount">0</span> 个景点</div>
+            </div>
+            <div class="landmarks-grid" id="landmarksGrid">
+                <noscript>
+                    <div style="text-align:center;padding:40px;color:#666;">
+                        <i class="fas fa-info-circle" style="font-size:48px;margin-bottom:15px;opacity:0.5;"></i>
+                        <p>请启用 JavaScript 以浏览景点信息</p>
+                    </div>
+                </noscript>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer">
+            <div class="p5">&copy; 2026 XJTU 智慧校园游</div>
+        </div>
+    </div>
+
+    <!-- 景点数据 -->
+    <script src="data/landmarks.js"></script>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // === 状态 ===
+        let currentFilter = '全部';
+        let currentSearch = '';
+        let expandedId = null;
+
+        // === DOM 引用 ===
+        const filterBar = document.getElementById('filterBar');
+        const grid = document.getElementById('landmarksGrid');
+        const gridCount = document.getElementById('gridCount');
+        const searchInput = document.getElementById('searchInput');
+        const detailPanel = document.getElementById('detailPanel');
+
+        // === 分类筛选 ===
+        function buildFilterBar() {
+            const counts = getCategoryCounts();
+            const categories = ['全部', ...Object.values(LANDMARK_CATEGORIES)];
+            filterBar.innerHTML = categories.map(cat => {
+                const active = cat === currentFilter ? ' active' : '';
+                const label = cat === '全部' ? '全部' : cat;
+                return '<span class="filter-tag' + active + '" data-cat="' + cat + '">' + label + ' <span class="count">' + (counts[cat] || 0) + '</span></span>';
+            }).join('');
+
+            filterBar.querySelectorAll('.filter-tag').forEach(tag => {
+                tag.addEventListener('click', function() {
+                    currentFilter = this.dataset.cat;
+                    buildFilterBar();
+                    renderGrid();
+                });
+            });
+        }
+
+        // === 过滤景点 ===
+        function getFilteredLandmarks() {
+            let list = getLandmarksByCategory(currentFilter);
+            if (currentSearch) {
+                const q = currentSearch.toLowerCase();
+                list = list.filter(l =>
+                    l.name.toLowerCase().includes(q) ||
+                    l.description.toLowerCase().includes(q) ||
+                    l.features.some(f => f.toLowerCase().includes(q))
+                );
+            }
+            return list;
+        }
+
+        // === 渲染卡片网格 ===
+        function renderGrid() {
+            const items = getFilteredLandmarks();
+            gridCount.textContent = items.length;
+
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="no-results"><i class="fas fa-search"></i>没有找到匹配的景点</div>';
+                return;
+            }
+
+            grid.innerHTML = items.map(l => {
+                const imgHtml = (l.images && l.images.length && l.images[0])
+                    ? '<img src="' + l.images[0] + '" alt="' + l.name + '">'
+                    : '<div class="card-image-placeholder">' + l.name.charAt(0) + '</div>';
+                const tagsHtml = l.features.map(f => '<span class="card-tag">' + f + '</span>').join('');
+                const hlClass = expandedId === l.id ? ' highlighted' : '';
+                return '<div class="landmark-card' + hlClass + '" data-id="' + l.id + '">'
+                    + '<div class="card-image">'
+                    + imgHtml
+                    + '<span class="card-badge">' + l.category + '</span>'
+                    + '</div>'
+                    + '<div class="card-body">'
+                    + '<div class="card-name">' + l.name + '</div>'
+                    + '<div class="card-desc">' + l.description + '</div>'
+                    + '<div class="card-tags">' + tagsHtml + '</div>'
+                    + '<button class="card-btn" data-id="' + l.id + '"><i class="fas fa-info-circle"></i> 查看详情</button>'
+                    + '</div>'
+                    + '</div>';
+            }).join('');
+
+            // 绑定按钮事件
+            grid.querySelectorAll('.card-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showDetail(this.dataset.id);
+                });
+            });
+
+            // 绑定卡片点击事件
+            grid.querySelectorAll('.landmark-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    showDetail(this.dataset.id);
+                });
+            });
+        }
+
+        // === 详情面板 ===
+        function showDetail(id) {
+            const lm = getLandmarkById(id);
+            if (!lm) return;
+            expandedId = id;
+
+            const imgHtml = (lm.images && lm.images.length && lm.images[0])
+                ? '<img src="' + lm.images[0] + '" alt="' + lm.name + '">'
+                : '<div class="detail-image-placeholder">' + lm.name.charAt(0) + '</div>';
+
+            const historyHtml = lm.history
+                ? '<div class="detail-history"><h4><i class="fas fa-book"></i> 历史背景</h4><p>' + lm.history + '</p></div>'
+                : '';
+
+            const tipsHtml = lm.tips
+                ? '<div class="detail-tips"><h4><i class="fas fa-lightbulb"></i> 温馨提示</h4><p>' + lm.tips + '</p></div>'
+                : '';
+
+            const nearbyHtml = lm.nearby && lm.nearby.length
+                ? '<div class="detail-nearby"><h4><i class="fas fa-map-marker-alt"></i> 附近景点</h4><div class="detail-nearby-list">' + lm.nearby.map(n => '<span class="detail-nearby-tag">' + n + '</span>').join('') + '</div></div>'
+                : '';
+
+            detailPanel.innerHTML = '<div class="detail-card">'
+                + '<div class="detail-header">'
+                + '<div><div class="detail-name">' + lm.name + '</div></div>'
+                + '<div style="display:flex;align-items:center;gap:12px;">'
+                + '<span class="detail-category">' + lm.category + '</span>'
+                + '<button class="detail-close" id="closeDetail"><i class="fas fa-times"></i></button>'
+                + '</div>'
+                + '</div>'
+                + '<div class="detail-body">'
+                + '<div class="detail-image">' + imgHtml + '</div>'
+                + '<div class="detail-info">'
+                + '<div class="detail-desc">' + lm.description + '</div>'
+                + historyHtml
+                + tipsHtml
+                + nearbyHtml
+                + '<div class="detail-actions">'
+                + '<a class="detail-btn primary" href="index.html#landmark-' + lm.id + '"><i class="fas fa-map-marked-alt"></i> 在地图中查看</a>'
+                + '<button class="detail-btn secondary" id="scrollToCard" data-id="' + lm.id + '"><i class="fas fa-list"></i> 返回列表</button>'
+                + '</div>'
+                + '</div>'
+                + '</div>'
+                + '</div>';
+
+            detailPanel.classList.add('visible');
+            renderGrid();
+
+            // 滚动到详情面板
+            detailPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // 关闭按钮
+            document.getElementById('closeDetail').addEventListener('click', function() {
+                expandedId = null;
+                detailPanel.classList.remove('visible');
+                renderGrid();
+            });
+
+            // 返回列表按钮
+            document.getElementById('scrollToCard').addEventListener('click', function() {
+                expandedId = null;
+                detailPanel.classList.remove('visible');
+                renderGrid();
+                // 滚动到对应卡片
+                const card = grid.querySelector('[data-id="' + this.dataset.id + '"]');
+                if (card) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
+
+        // === URL 参数处理 ===
+        function handleUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (id) {
+                const lm = getLandmarkById(id);
+                if (lm) {
+                    // 设置对应分类
+                    currentFilter = lm.category;
+                    buildFilterBar();
+                    renderGrid();
+                    showDetail(id);
+                    return;
+                }
+            }
+            renderGrid();
+        }
+
+        // === 搜索 ===
+        searchInput.addEventListener('input', function() {
+            currentSearch = this.value.trim();
+            renderGrid();
+        });
+
+        // === 返回顶部按钮 ===
+        const topBtn = document.getElementById('myBtn');
+        window.addEventListener('scroll', function() {
+            topBtn.style.display = window.scrollY > 300 ? 'block' : 'none';
+        });
+        topBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // === 初始化 ===
+        buildFilterBar();
+        handleUrlParams();
+
+    })();
+    </script>
+</body>
+</html>

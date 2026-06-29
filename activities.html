@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="西安交通大学校园活动，包括学术讲座、文化活动、体育赛事、社团招新等丰富多彩的校园生活。">
+    <title>XJTU智慧校园游 - 全部活动</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
+
+    <!-- 高德地图安全配置（必须在 API 之前） -->
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: "9b47b403fdb0cb0385b6cce4c6cdf2b5",
+        };
+    </script>
+
+    <!-- 高德地图 JS API -->
+    <script src="https://webapi.amap.com/maps?v=2.0&key=c3671efe6405aa35284c356354f6ad81&plugin=AMap.Panorama"></script>
+    <script src="https://webapi.amap.com/ui/1.1/main.js"></script>
+
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 样式 -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* 全部活动页面样式 */
+        .activities-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            text-align: center;
+            padding: 80px 20px 60px;
+            margin-bottom: 60px;
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+        }
+
+        .activities-hero h1 {
+            font-size: 2.5em;
+            margin: 0 0 15px 0;
+            font-weight: 700;
+        }
+
+        .activities-hero p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .activities-container {
+            width: 100%;
+            padding: 0 40px 60px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .section-title p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+        }
+
+        .activity-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .activity-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #fff;
+        }
+
+        .activity-card h3 {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .activity-card p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+
+        .activity-btn {
+            display: inline-block;
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 0.9em;
+            transition: opacity 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .activity-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* 响应式布局 */
+        @media (max-width: 1024px) {
+            .activities-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .activities-hero h1 {
+                font-size: 1.8em;
+            }
+
+            .activities-hero p {
+                font-size: 1em;
+            }
+
+            .activities-container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .activities-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .activity-card {
+                padding: 25px 15px;
+            }
+
+            .activity-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .activities-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="myBtn" aria-label="返回顶部"><i class="fas fa-arrow-up"></i></button>
+
+    <div class="flex">
+        <!-- 导航栏 -->
+        <div class="flex-container">
+            <div class="logo">
+                <a href="https://www.xjtu.edu.cn/" target="_blank"><img src="images/logo.png" class="logo" alt="西安交通大学"></a>
+            </div>
+            <ul>
+                <div class="dropdown">
+                    <a href="index.html" class="dropdown">首页</a>
+                </div>
+                <div class="dropdown">
+                    <a href="landmarks.html" class="dropdown">景点介绍</a>
+                </div>
+                <div class="dropdown">
+                    <a href="activities.html" class="dropdown" style="color:#667eea;font-weight:600;">全部活动</a>
+                    <div class="dropdown-content">
+                        <a href="activities.html">活动介绍</a>
+                        <a href="activities.html">活动管理</a>
+                        <a href="activities.html">活动剪影</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <a href="transport.html" class="dropdown">交通推荐</a>
+                </div>
+                <div class="dropdown">
+                    <a href="https://zajdcl.xjtu.edu.cn/ucdtmas-h5/visit-index" class="dropdown" target="_blank">预约服务</a>
+                    <div class="dropdown-content">
+                        <a href="https://zajdcl.xjtu.edu.cn/ucdtmas-h5/visit-index" target="_blank">场馆预约</a>
+                        <a href="https://zajdcl.xjtu.edu.cn/ucdtmas-h5/visit-index" target="_blank">参观申请</a>
+                        <a href="https://zajdcl.xjtu.edu.cn/ucdtmas-h5/visit-index" target="_blank">服务预定</a>
+                    </div>
+                </div>
+            </ul>
+            <div class="dropdown">
+                <i class="fas fa-search icon"></i>
+            </div>
+            <div class="dropdown">
+                <i class="fas fa-user icon"></i>
+            </div>
+            <div class="dropdown">
+                <i class="fas fa-bars icon"></i>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="flex">
+            <!-- Hero 区域 -->
+            <div class="activities-hero">
+                <h1>校园活动</h1>
+                <p>探索丰富多彩的校园生活</p>
+            </div>
+
+            <!-- 活动分类区域 -->
+            <div class="activities-container">
+                <div class="section-title">
+                    <h2>精彩活动</h2>
+                    <p>发现交大校园中的无限可能</p>
+                </div>
+
+                <div class="activities-grid">
+                    <!-- 学术讲座 -->
+                    <div class="activity-card">
+                        <div class="activity-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>学术讲座</h3>
+                        <p>每周定期举办前沿学术讲座，邀请国内外知名学者</p>
+                        <button class="activity-btn" onclick="alert('学术讲座详情请关注学校教务处通知')">了解更多</button>
+                    </div>
+
+                    <!-- 文化活动 -->
+                    <div class="activity-card">
+                        <div class="activity-icon">
+                            <i class="fas fa-music"></i>
+                        </div>
+                        <h3>文化活动</h3>
+                        <p>传统文化节、音乐演出、书画展览</p>
+                        <button class="activity-btn" onclick="alert('文化活动详情请关注校团委公告')">了解更多</button>
+                    </div>
+
+                    <!-- 体育赛事 -->
+                    <div class="activity-card">
+                        <div class="activity-icon">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <h3>体育赛事</h3>
+                        <p>校运会、篮球赛、马拉松等体育活动</p>
+                        <button class="activity-btn" onclick="alert('体育赛事详情请关注体育部通知')">了解更多</button>
+                    </div>
+
+                    <!-- 社团招新 -->
+                    <div class="activity-card">
+                        <div class="activity-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>社团招新</h3>
+                        <p>100+学生社团，涵盖学术、艺术、公益等领域</p>
+                        <button class="activity-btn" onclick="alert('社团招新信息请关注学生会公告')">了解更多</button>
+                    </div>
+
+                    <!-- 志愿服务 -->
+                    <div class="activity-card">
+                        <div class="activity-icon">
+                            <i class="fas fa-hands-helping"></i>
+                        </div>
+                        <h3>志愿服务</h3>
+                        <p>社区服务、支教活动、环保行动</p>
+                        <button class="activity-btn" onclick="alert('志愿服务详情请关注青协公告')">了解更多</button>
+                    </div>
+
+                    <!-- 创新创业 -->
+                    <div class="activity-card">
+                        <div class="activity-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h3>创新创业</h3>
+                        <p>创新创业大赛、孵化项目、导师指导</p>
+                        <button class="activity-btn" onclick="alert('创新创业详情请关注创新中心公告')">了解更多</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 页脚 -->
+            <div class="footer">
+                <div class="p5">&copy; 2026 XJTU 智慧校园游</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 返回顶部按钮脚本 -->
+    <script>
+        var mybutton = document.getElementById("myBtn");
+        window.onscroll = function() {
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                mybutton.style.display = "block";
+            } else {
+                mybutton.style.display = "none";
+            }
+        };
+        mybutton.onclick = function() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        };
+    </script>
+</body>
+</html>
